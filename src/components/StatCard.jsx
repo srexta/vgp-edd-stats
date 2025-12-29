@@ -15,6 +15,9 @@ function StatCard({
 		if (loading) return '...';
 		if (val === null || val === undefined) return '-';
 
+		// If value is already a string (pre-formatted), return as-is
+		if (typeof val === 'string') return val;
+
 		switch (type) {
 			case 'currency':
 				return formatCurrency(val);

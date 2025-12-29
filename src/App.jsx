@@ -6,6 +6,7 @@ import ProductPerformancePage from './pages/ProductPerformancePage';
 import SubscriptionAnalyticsPage from './pages/SubscriptionAnalyticsPage';
 import CustomersRevenuePage from './pages/CustomersRevenuePage';
 import MRRGrowthPage from './pages/MRRGrowthPage';
+import ChurnRetentionPage from './pages/ChurnRetentionPage';
 import RenewalsPage from './pages/RenewalsPage';
 import RefundsPage from './pages/RefundsPage';
 import LicensingPage from './pages/LicensingPage';
@@ -39,6 +40,8 @@ function App({ section }) {
 				return <CustomersRevenuePage dateRange={dateRange} />;
 			case 'mrr-growth':
 				return <MRRGrowthPage dateRange={dateRange} />;
+			case 'churn-retention':
+				return <ChurnRetentionPage dateRange={dateRange} />;
 			case 'renewals':
 				return <RenewalsPage dateRange={dateRange} />;
 			case 'refunds':
@@ -89,6 +92,7 @@ function getSectionTitle(section) {
 		'subscription-analytics': 'Subscription Analytics',
 		'customers-revenue': 'Customers & Revenue',
 		'mrr-growth': 'MRR & Growth',
+		'churn-retention': 'Churn & Retention',
 		'renewals': 'Renewals & Cancellations',
 		'refunds': 'Refunds',
 		'licensing': 'Software Licensing',

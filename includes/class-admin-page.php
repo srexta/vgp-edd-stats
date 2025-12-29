@@ -62,6 +62,7 @@ class VGP_EDD_Stats_Admin_Page {
         $subpages = array(
             'customers-revenue'      => __( 'Customers & Revenue', 'vgp-edd-stats' ),
             'mrr-growth'             => __( 'MRR & Growth', 'vgp-edd-stats' ),
+            'churn-retention'        => __( 'Churn & Retention', 'vgp-edd-stats' ),
             'renewals'               => __( 'Renewals & Cancellations', 'vgp-edd-stats' ),
             'refunds'                => __( 'Refunds', 'vgp-edd-stats' ),
             'licensing'              => __( 'Software Licensing', 'vgp-edd-stats' ),

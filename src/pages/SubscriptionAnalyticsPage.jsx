@@ -85,7 +85,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         },
         series: [{
             type: 'bar',
-            data: mrrData?.waterfall || [],
+            data: mrrData?.data?.waterfall || [],
             itemStyle: {
                 color: (params) => {
                     const colors = {
@@ -138,7 +138,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         },
         yAxis: {
             type: 'category',
-            data: cohortData?.cohorts || [],
+            data: cohortData?.data?.cohorts || [],
             splitArea: { show: true },
             name: 'Signup Cohort',
             nameLocation: 'middle',
@@ -158,7 +158,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         },
         series: [{
             type: 'heatmap',
-            data: cohortData?.heatmapData || [],
+            data: cohortData?.data?.heatmapData || [],
             label: {
                 show: true,
                 formatter: (params) => `${params.value[2]}%`
@@ -196,7 +196,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
             emphasis: {
                 focus: 'adjacency'
             },
-            data: lifecycleData?.nodes || [
+            data: lifecycleData?.data?.nodes || [
                 { name: 'Trial' },
                 { name: 'Active Paid' },
                 { name: 'Upgraded' },
@@ -204,7 +204,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 { name: 'Churned' },
                 { name: 'Reactivated' }
             ],
-            links: lifecycleData?.links || [],
+            links: lifecycleData?.data?.links || [],
             lineStyle: {
                 color: 'gradient',
                 curveness: 0.5
@@ -253,7 +253,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: churnData?.dates || []
+            data: churnData?.data?.dates || []
         },
         yAxis: {
             type: 'value',
@@ -266,7 +266,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 name: 'Voluntary Churn',
                 type: 'line',
                 smooth: true,
-                data: churnData?.voluntary || [],
+                data: churnData?.data?.voluntary || [],
                 itemStyle: { color: '#ef4444' },
                 areaStyle: {
                     color: {
@@ -283,7 +283,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 name: 'Involuntary Churn',
                 type: 'line',
                 smooth: true,
-                data: churnData?.involuntary || [],
+                data: churnData?.data?.involuntary || [],
                 itemStyle: { color: '#f59e0b' },
                 areaStyle: {
                     color: {
@@ -300,7 +300,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 name: 'Total Churn',
                 type: 'line',
                 smooth: true,
-                data: churnData?.total || [],
+                data: churnData?.data?.total || [],
                 itemStyle: { color: '#6366f1' },
                 lineStyle: { width: 3 }
             }
@@ -329,7 +329,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         },
         xAxis: {
             type: 'category',
-            data: planMovementData?.planNames || ['Basic', 'Pro', 'Premium', 'Enterprise'],
+            data: planMovementData?.data?.planNames || ['Basic', 'Pro', 'Premium', 'Enterprise'],
             splitArea: { show: true },
             name: 'From Plan',
             nameLocation: 'middle',
@@ -337,7 +337,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         },
         yAxis: {
             type: 'category',
-            data: planMovementData?.planNames || ['Basic', 'Pro', 'Premium', 'Enterprise'],
+            data: planMovementData?.data?.planNames || ['Basic', 'Pro', 'Premium', 'Enterprise'],
             splitArea: { show: true },
             name: 'To Plan',
             nameLocation: 'middle',
@@ -345,7 +345,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         },
         visualMap: {
             min: 0,
-            max: planMovementData?.maxMovement || 100,
+            max: planMovementData?.data?.maxMovement || 100,
             calculable: true,
             orient: 'horizontal',
             left: 'center',
@@ -356,7 +356,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         },
         series: [{
             type: 'heatmap',
-            data: planMovementData?.matrixData || [],
+            data: planMovementData?.data?.matrixData || [],
             label: {
                 show: true,
                 formatter: (params) => params.value[2] || '0'
@@ -417,7 +417,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
             {
                 name: 'Recovery Rate',
                 type: 'bar',
-                data: dunningData?.recoveryRates || [65, 45, 30, 15],
+                data: dunningData?.data?.recoveryRates || [65, 45, 30, 15],
                 itemStyle: { color: '#10b981' },
                 yAxisIndex: 0,
                 label: {
@@ -429,7 +429,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
             {
                 name: 'Revenue Recovered',
                 type: 'line',
-                data: dunningData?.revenueRecovered || [],
+                data: dunningData?.data?.revenueRecovered || [],
                 itemStyle: { color: '#3b82f6' },
                 yAxisIndex: 1,
                 smooth: true,
@@ -478,7 +478,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                     fontWeight: 'bold'
                 }
             },
-            data: churnData?.reasons || [
+            data: churnData?.data?.reasons || [
                 { value: 35, name: 'Too Expensive', itemStyle: { color: '#ef4444' } },
                 { value: 25, name: 'Not Using Enough', itemStyle: { color: '#f59e0b' } },
                 { value: 20, name: 'Missing Features', itemStyle: { color: '#8b5cf6' } },
@@ -512,7 +512,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: dunningData?.timelineDates || []
+            data: dunningData?.data?.timelineDates || []
         },
         yAxis: [
             {
@@ -536,21 +536,21 @@ function SubscriptionAnalyticsPage({ dateRange }) {
             {
                 name: 'Failed Payments',
                 type: 'bar',
-                data: dunningData?.failedPayments || [],
+                data: dunningData?.data?.failedPayments || [],
                 itemStyle: { color: '#ef4444' },
                 yAxisIndex: 0
             },
             {
                 name: 'Recovered Revenue',
                 type: 'bar',
-                data: dunningData?.recoveredRevenue || [],
+                data: dunningData?.data?.recoveredRevenue || [],
                 itemStyle: { color: '#10b981' },
                 yAxisIndex: 0
             },
             {
                 name: 'Recovery Rate',
                 type: 'line',
-                data: dunningData?.timelineRecoveryRate || [],
+                data: dunningData?.data?.timelineRecoveryRate || [],
                 itemStyle: { color: '#3b82f6' },
                 yAxisIndex: 1,
                 smooth: true,
@@ -573,26 +573,26 @@ function SubscriptionAnalyticsPage({ dateRange }) {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <StatCard
                     title="Current MRR"
-                    value={mrrData?.currentMRR}
+                    value={mrrData?.data?.currentMRR}
                     type="currency"
                     loading={mrrLoading}
-                    change={mrrData?.mrrGrowthRate}
+                    change={mrrData?.data?.mrrGrowthRate}
                 />
                 <StatCard
                     title="New MRR"
-                    value={mrrData?.newMRR}
+                    value={mrrData?.data?.newMRR}
                     type="currency"
                     loading={mrrLoading}
                 />
                 <StatCard
                     title="Expansion MRR"
-                    value={mrrData?.expansionMRR}
+                    value={mrrData?.data?.expansionMRR}
                     type="currency"
                     loading={mrrLoading}
                 />
                 <StatCard
                     title="Churned MRR"
-                    value={mrrData?.churnedMRR}
+                    value={mrrData?.data?.churnedMRR}
                     type="currency"
                     loading={mrrLoading}
                     invertChange={true}
@@ -614,19 +614,19 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <StatCard
                         title="Average 3-Month Retention"
-                        value={cohortData?.avgThreeMonthRetention}
+                        value={cohortData?.data?.avgThreeMonthRetention}
                         type="percentage"
                         loading={cohortLoading}
                     />
                     <StatCard
                         title="Average 6-Month Retention"
-                        value={cohortData?.avgSixMonthRetention}
+                        value={cohortData?.data?.avgSixMonthRetention}
                         type="percentage"
                         loading={cohortLoading}
                     />
                     <StatCard
                         title="Average 12-Month Retention"
-                        value={cohortData?.avgTwelveMonthRetention}
+                        value={cohortData?.data?.avgTwelveMonthRetention}
                         type="percentage"
                         loading={cohortLoading}
                     />
@@ -644,26 +644,26 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <StatCard
                         title="Trial Conversion Rate"
-                        value={lifecycleData?.trialConversionRate}
+                        value={lifecycleData?.data?.trialConversionRate}
                         type="percentage"
                         loading={lifecycleLoading}
                     />
                     <StatCard
                         title="Upgrade Rate"
-                        value={lifecycleData?.upgradeRate}
+                        value={lifecycleData?.data?.upgradeRate}
                         type="percentage"
                         loading={lifecycleLoading}
                     />
                     <StatCard
                         title="Downgrade Rate"
-                        value={lifecycleData?.downgradeRate}
+                        value={lifecycleData?.data?.downgradeRate}
                         type="percentage"
                         loading={lifecycleLoading}
                         invertChange={true}
                     />
                     <StatCard
                         title="Reactivation Rate"
-                        value={lifecycleData?.reactivationRate}
+                        value={lifecycleData?.data?.reactivationRate}
                         type="percentage"
                         loading={lifecycleLoading}
                     />
@@ -700,28 +700,28 @@ function SubscriptionAnalyticsPage({ dateRange }) {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <StatCard
                     title="Overall Churn Rate"
-                    value={churnData?.overallChurnRate}
+                    value={churnData?.data?.overallChurnRate}
                     type="percentage"
                     loading={churnLoading}
                     invertChange={true}
                 />
                 <StatCard
                     title="Voluntary Churn Rate"
-                    value={churnData?.voluntaryChurnRate}
+                    value={churnData?.data?.voluntaryChurnRate}
                     type="percentage"
                     loading={churnLoading}
                     invertChange={true}
                 />
                 <StatCard
                     title="Involuntary Churn Rate"
-                    value={churnData?.involuntaryChurnRate}
+                    value={churnData?.data?.involuntaryChurnRate}
                     type="percentage"
                     loading={churnLoading}
                     invertChange={true}
                 />
                 <StatCard
                     title="Win-back Success Rate"
-                    value={churnData?.winbackRate}
+                    value={churnData?.data?.winbackRate}
                     type="percentage"
                     loading={churnLoading}
                 />
@@ -733,19 +733,19 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <StatCard
                         title="Net Plan Upgrades"
-                        value={planMovementData?.netUpgrades}
+                        value={planMovementData?.data?.netUpgrades}
                         type="number"
                         loading={planMovementLoading}
                     />
                     <StatCard
                         title="Upgrade Revenue Impact"
-                        value={planMovementData?.upgradeRevenueImpact}
+                        value={planMovementData?.data?.upgradeRevenueImpact}
                         type="currency"
                         loading={planMovementLoading}
                     />
                     <StatCard
                         title="Downgrade Revenue Impact"
-                        value={planMovementData?.downgradeRevenueImpact}
+                        value={planMovementData?.data?.downgradeRevenueImpact}
                         type="currency"
                         loading={planMovementLoading}
                         invertChange={true}
@@ -764,26 +764,26 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <StatCard
                         title="Failed Payment Rate"
-                        value={dunningData?.failedPaymentRate}
+                        value={dunningData?.data?.failedPaymentRate}
                         type="percentage"
                         loading={dunningLoading}
                         invertChange={true}
                     />
                     <StatCard
                         title="Overall Recovery Rate"
-                        value={dunningData?.overallRecoveryRate}
+                        value={dunningData?.data?.overallRecoveryRate}
                         type="percentage"
                         loading={dunningLoading}
                     />
                     <StatCard
                         title="Total Revenue Recovered"
-                        value={dunningData?.totalRevenueRecovered}
+                        value={dunningData?.data?.totalRevenueRecovered}
                         type="currency"
                         loading={dunningLoading}
                     />
                     <StatCard
                         title="Avg Days to Recovery"
-                        value={dunningData?.avgDaysToRecovery}
+                        value={dunningData?.data?.avgDaysToRecovery}
                         type="number"
                         loading={dunningLoading}
                     />
@@ -816,33 +816,33 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                     <div>
                         <h4 className="font-semibold text-blue-800 mb-2">MRR Health</h4>
                         <ul className="space-y-1 text-gray-700">
-                            <li>• Net MRR growth driven by {mrrData?.topGrowthDriver || 'new subscriptions'}</li>
-                            <li>• Expansion MRR represents {mrrData?.expansionPercentage || '25'}% of new MRR</li>
-                            <li>• Contraction impact: {mrrData?.contractionImpact || 'low'}</li>
+                            <li>• Net MRR growth driven by {mrrData?.data?.topGrowthDriver || 'new subscriptions'}</li>
+                            <li>• Expansion MRR represents {mrrData?.data?.expansionPercentage || '25'}% of new MRR</li>
+                            <li>• Contraction impact: {mrrData?.data?.contractionImpact || 'low'}</li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-semibold text-purple-800 mb-2">Retention Patterns</h4>
                         <ul className="space-y-1 text-gray-700">
-                            <li>• Strongest cohort: {cohortData?.strongestCohort || 'Q1 2024'}</li>
-                            <li>• Retention drop-off peaks at month {cohortData?.dropoffMonth || '3'}</li>
-                            <li>• Revenue retention exceeds logo retention by {cohortData?.retentionGap || '15'}%</li>
+                            <li>• Strongest cohort: {cohortData?.data?.strongestCohort || 'Q1 2024'}</li>
+                            <li>• Retention drop-off peaks at month {cohortData?.data?.dropoffMonth || '3'}</li>
+                            <li>• Revenue retention exceeds logo retention by {cohortData?.data?.retentionGap || '15'}%</li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-semibold text-red-800 mb-2">Churn Risks</h4>
                         <ul className="space-y-1 text-gray-700">
-                            <li>• Primary churn reason: {churnData?.topChurnReason || 'pricing concerns'}</li>
-                            <li>• Involuntary churn: {churnData?.involuntaryPercentage || '30'}% of total</li>
-                            <li>• Win-back rate highest for {churnData?.bestWinbackSegment || 'annual plans'}</li>
+                            <li>• Primary churn reason: {churnData?.data?.topChurnReason || 'pricing concerns'}</li>
+                            <li>• Involuntary churn: {churnData?.data?.involuntaryPercentage || '30'}% of total</li>
+                            <li>• Win-back rate highest for {churnData?.data?.bestWinbackSegment || 'annual plans'}</li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-semibold text-green-800 mb-2">Recovery Opportunities</h4>
                         <ul className="space-y-1 text-gray-700">
-                            <li>• First recovery attempt succeeds {dunningData?.firstAttemptRate || '65'}% of time</li>
-                            <li>• ${dunningData?.potentialRecovery || '12,500'} in at-risk payments recoverable</li>
-                            <li>• Payment retry optimization could improve recovery by {dunningData?.optimizationPotential || '15'}%</li>
+                            <li>• First recovery attempt succeeds {dunningData?.data?.firstAttemptRate || '65'}% of time</li>
+                            <li>• ${dunningData?.data?.potentialRecovery || '12,500'} in at-risk payments recoverable</li>
+                            <li>• Payment retry optimization could improve recovery by {dunningData?.data?.optimizationPotential || '15'}%</li>
                         </ul>
                     </div>
                 </div>

@@ -487,6 +487,244 @@ class VGP_EDD_Stats_API {
 			)
 		);
 
+		// Executive Overview endpoints.
+		register_rest_route(
+			self::NAMESPACE,
+			'/summary',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_summary' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/revenue/overview',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_revenue_overview' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/mrr',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_mrr_summary' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/churn/rate',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_churn_rate' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/customers/revenue',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_customers_revenue' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		// Subscription Analytics endpoints.
+		register_rest_route(
+			self::NAMESPACE,
+			'/mrr/momentum',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_mrr_momentum' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/subscriptions/cohort-retention',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_cohort_retention' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/subscriptions/lifecycle',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_subscription_lifecycle' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/subscriptions/churn-analysis',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_churn_analysis' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/subscriptions/plan-movement',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_plan_movement' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/subscriptions/dunning-recovery',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_dunning_recovery' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		// Revenue Intelligence endpoints.
+		register_rest_route(
+			self::NAMESPACE,
+			'/revenue/by-payment-method',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_revenue_by_payment_method' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/revenue/cohort',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_cohort_revenue' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/revenue/projections',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_revenue_projections' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/revenue/failed-payment-recovery',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_failed_payment_recovery' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		// Churn & Retention comprehensive endpoints.
+		register_rest_route(
+			self::NAMESPACE,
+			'/churn/comprehensive',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_churn_comprehensive' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/churn/monthly-trends',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_churn_monthly_trends' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/retention/cohort-heatmap',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_retention_cohort_heatmap' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => array(
+					'max_years' => array(
+						'default'           => 6,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
+		// Used for temporary purpose
+		register_rest_route(
+			self::NAMESPACE,
+			'/cohort/customer-count',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_cohort_customer_count' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => array(
+					'year' => array(
+						'required'          => true,
+						'validate_callback' => function( $param ) {
+							return is_numeric( $param ) && intval( $param ) >= 2000 && intval( $param ) <= 2100;
+						},
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/retention/curve',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_retention_curve' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => $this->get_date_range_args(),
+			)
+		);
+
 		// Cache management endpoints.
 		register_rest_route(
 			self::NAMESPACE,
@@ -1237,6 +1475,399 @@ class VGP_EDD_Stats_API {
         $end_date   = $request->get_param( 'end_date' );
 
         $data = VGP_EDD_Stats_Query::get_failed_payment_recovery( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get executive summary.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_summary( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_executive_summary( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get revenue overview with daily breakdown.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_revenue_overview( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_revenue_overview( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get MRR summary.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_mrr_summary( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_mrr_summary( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get churn rate.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_churn_rate( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_churn_rate_summary( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get customers revenue metrics.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_customers_revenue( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_customers_revenue_metrics( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get MRR momentum and waterfall.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_mrr_momentum( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_mrr_momentum( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get cohort retention for subscriptions.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_cohort_retention( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_subscription_cohort_retention( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get subscription lifecycle flow.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_subscription_lifecycle( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_subscription_lifecycle_flow( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get detailed churn analysis.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_churn_analysis( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_subscription_churn_analysis( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get plan movement (upgrades/downgrades).
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_plan_movement( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_upgrade_downgrade_trends( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get dunning recovery metrics.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_dunning_recovery( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_dunning_recovery_metrics( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get revenue by payment method.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_revenue_by_payment_method( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_revenue_by_payment_method( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get cohort revenue heatmap.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_cohort_revenue( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_cohort_revenue_heatmap( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get revenue projections.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_revenue_projections( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_revenue_projections( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get failed payment recovery (revenue endpoint).
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_failed_payment_recovery( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_failed_payment_recovery( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get comprehensive churn data.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_churn_comprehensive( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_churn_comprehensive( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get monthly churn trends.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_churn_monthly_trends( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_churn_monthly_trends( $start_date, $end_date );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get retention cohort heatmap data.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_retention_cohort_heatmap( $request ) {
+		$max_years = $request->get_param( 'max_years' );
+
+		$data = VGP_EDD_Stats_Query::get_retention_cohort_heatmap( $max_years );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
+	}
+
+	/**
+	 * Get customer count for a specific cohort year.
+	 * Used for temporary purpose.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_cohort_customer_count( $request ) {
+		$year = $request->get_param( 'year' );
+		$data = VGP_EDD_Stats_Query::get_cohort_customer_count( $year );
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Get retention curve data.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_retention_curve( $request ) {
+		$start_date = $request->get_param( 'start_date' );
+		$end_date   = $request->get_param( 'end_date' );
+
+		$data = VGP_EDD_Stats_Query::get_retention_curve( $start_date, $end_date );
 
 		return rest_ensure_response(
 			array(

@@ -268,4 +268,75 @@ export const API = {
 
 	getPaymentFailures: (dateRange) =>
 		apiRequest('/payments/failures', formatDateRange(dateRange)),
+
+	// Executive Overview
+	getSummary: (dateRange) =>
+		apiRequest('/summary', formatDateRange(dateRange)),
+
+	getRevenueOverview: (dateRange) =>
+		apiRequest('/revenue/overview', formatDateRange(dateRange)),
+
+	getMRR: (dateRange) =>
+		apiRequest('/mrr', formatDateRange(dateRange)),
+
+	getChurnRate: (dateRange) =>
+		apiRequest('/churn/rate', formatDateRange(dateRange)),
+
+	getCustomersRevenue: (dateRange) =>
+		apiRequest('/customers/revenue', formatDateRange(dateRange)),
+
+	// Subscription Analytics
+	getMRRMomentum: (dateRange) =>
+		apiRequest('/mrr/momentum', formatDateRange(dateRange)),
+
+	getCohortRetention: (dateRange) =>
+		apiRequest('/subscriptions/cohort-retention', formatDateRange(dateRange)),
+
+	getSubscriptionLifecycle: (dateRange) =>
+		apiRequest('/subscriptions/lifecycle', formatDateRange(dateRange)),
+
+	getChurnAnalysis: (dateRange) =>
+		apiRequest('/subscriptions/churn-analysis', formatDateRange(dateRange)),
+
+	getPlanMovement: (dateRange) =>
+		apiRequest('/subscriptions/plan-movement', formatDateRange(dateRange)),
+
+	getDunningRecovery: (dateRange) =>
+		apiRequest('/subscriptions/dunning-recovery', formatDateRange(dateRange)),
+
+	// Revenue Intelligence
+	getRevenueBreakdown: (dateRange) =>
+		apiRequest('/revenue/breakdown', formatDateRange(dateRange)),
+
+	getRevenueConcentration: (dateRange) =>
+		apiRequest('/revenue/concentration', formatDateRange(dateRange)),
+
+	getRevenueByPaymentMethod: (dateRange) =>
+		apiRequest('/revenue/by-payment-method', formatDateRange(dateRange)),
+
+	getCohortRevenue: (dateRange) =>
+		apiRequest('/revenue/cohort', formatDateRange(dateRange)),
+
+	getRevenueProjections: (dateRange) =>
+		apiRequest('/revenue/projections', formatDateRange(dateRange)),
+
+	getFailedPaymentRecovery: (dateRange) =>
+		apiRequest('/revenue/failed-payment-recovery', formatDateRange(dateRange)),
+
+	// Churn & Retention
+	getChurnComprehensive: (dateRange) =>
+		apiRequest('/churn/comprehensive', formatDateRange(dateRange)),
+
+	getChurnMonthlyTrends: (dateRange) =>
+		apiRequest('/churn/monthly-trends', formatDateRange(dateRange)),
+
+	getRetentionCohortHeatmap: (maxYears = 6) =>
+		apiRequest('/retention/cohort-heatmap', { max_years: maxYears }),
+
+	getRetentionCurve: (dateRange) =>
+		apiRequest('/retention/curve', formatDateRange(dateRange)),
+
+	// Used for temporary purpose
+	getCohortCustomerCount: (year) =>
+		apiRequest('/cohort/customer-count', { year }),
 };
