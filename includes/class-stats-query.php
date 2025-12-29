@@ -3969,8 +3969,9 @@ class VGP_EDD_Stats_Query {
 		$cohorts = array();
 
 		// Get signup years with customer counts AND recurring subscription counts.
-		// Count ALL customers who had their first subscription in each year (regardless of type)
-		// But only count recurring subscriptions (exclude lifetime purchases)
+		// Count NEW product subscriptions per customer (product-based cohort tracking)
+		// A customer buying Product A in 2022 and Product B in 2023 counts in BOTH years
+		// But renewals of the same product are NOT counted (only first purchase of each product)
 		$signup_years = $wpdb->get_results(
 			$wpdb->prepare(
 				"
@@ -3981,17 +3982,20 @@ class VGP_EDD_Stats_Query {
 				FROM (
 					SELECT 
 						s.customer_id,
+						s.product_id,
 						s.created,
 						s.recurring_amount
 					FROM {$prefix}edd_subscriptions s
 					INNER JOIN (
 						SELECT 
 							customer_id,
+							product_id,
 							MIN(created) as first_created
 						FROM {$prefix}edd_subscriptions
 						WHERE YEAR(created) >= %d
-						GROUP BY customer_id
+						GROUP BY customer_id, product_id
 					) as first_dates ON s.customer_id = first_dates.customer_id 
+						AND s.product_id = first_dates.product_id
 						AND s.created = first_dates.first_created
 					WHERE YEAR(s.created) >= %d
 				) as first_sub
@@ -4093,9 +4097,10 @@ class VGP_EDD_Stats_Query {
 		// Build cache key
 		$cache_key = 'cohort_customer_count_' . $year;
 
-		// Query to get customer count (all customers) and FIRST recurring subscription count for the specific year
-		// Count ALL customers who had their first subscription in 2023 (regardless of type)
-		// But only count recurring subscriptions (exclude lifetime purchases)
+		// Query to get customer count (all customers) and NEW product subscription count for the specific year
+		// Count NEW product subscriptions per customer (product-based cohort tracking)
+		// A customer buying Product A in 2022 and Product B in 2023 counts in BOTH years
+		// But renewals of the same product are NOT counted (only first purchase of each product)
 		$query = $wpdb->prepare(
 			"
 			SELECT 
@@ -4105,17 +4110,20 @@ class VGP_EDD_Stats_Query {
 			FROM (
 				SELECT 
 					s.customer_id,
+					s.product_id,
 					s.created,
 					s.recurring_amount
 				FROM {$prefix}edd_subscriptions s
 				INNER JOIN (
 					SELECT 
 						customer_id,
+						product_id,
 						MIN(created) as first_created
 					FROM {$prefix}edd_subscriptions
 					WHERE YEAR(created) = %d
-					GROUP BY customer_id
+					GROUP BY customer_id, product_id
 				) as first_dates ON s.customer_id = first_dates.customer_id 
+					AND s.product_id = first_dates.product_id
 					AND s.created = first_dates.first_created
 				WHERE YEAR(s.created) = %d
 			) as first_sub
