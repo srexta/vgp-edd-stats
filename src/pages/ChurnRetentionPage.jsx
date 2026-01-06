@@ -224,13 +224,28 @@ function ChurnRetentionPage({ dateRange }) {
 		return 'bg-red-100 text-red-800';
 	};
 
-	// Get churn rate cell color for heatmap
+	// Get churn rate cell color for heatmap (for other uses)
 	const getCellColor = (rate) => {
 		if (rate === null || rate === undefined) return 'bg-gray-100 text-gray-400';
 		if (rate < 20) return 'bg-green-200 text-green-900';
 		if (rate < 40) return 'bg-green-100 text-green-800';
 		if (rate < 60) return 'bg-yellow-100 text-yellow-800';
 		if (rate < 80) return 'bg-orange-100 text-orange-800';
+		return 'bg-red-100 text-red-800';
+	};
+
+	// Get retention rate cell color for cohort table (inverted logic: high retention = good)
+	const getRetentionCellColor = (retentionRate) => {
+		if (retentionRate === null || retentionRate === undefined) return 'bg-gray-100 text-gray-400';
+		// High retention (80%+) = excellent (green)
+		if (retentionRate >= 80) return 'bg-green-200 text-green-900';
+		// Good retention (60-80%) = good (light green)
+		if (retentionRate >= 60) return 'bg-green-100 text-green-800';
+		// Medium retention (40-60%) = moderate (yellow)
+		if (retentionRate >= 40) return 'bg-yellow-100 text-yellow-800';
+		// Low retention (20-40%) = concerning (orange)
+		if (retentionRate >= 20) return 'bg-orange-100 text-orange-800';
+		// Very low retention (<20%) = critical (red)
 		return 'bg-red-100 text-red-800';
 	};
 
@@ -368,7 +383,7 @@ function ChurnRetentionPage({ dateRange }) {
 											key={i}
 											className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
 										>
-											Year {i + 1}
+											Year {i + 1} Retention
 										</th>
 									))}
 								</tr>
@@ -386,13 +401,17 @@ function ChurnRetentionPage({ dateRange }) {
 											{cohort.subscriptions || cohort.customers}
 										</td>
 										{Array.from({ length: maxYears }, (_, i) => {
-											const rate = cohort.churn_rates?.[`year_${i + 1}`];
+											const churnRate = cohort.churn_rates?.[`year_${i + 1}`];
+											// Convert churn rate to retention rate
+											const retentionRate = churnRate !== null && churnRate !== undefined 
+												? Math.round((100 - churnRate) * 10) / 10 
+												: null;
 											return (
 												<td
 													key={i}
-													className={`px-4 py-3 whitespace-nowrap text-sm text-center ${getCellColor(rate)}`}
+													className={`px-4 py-3 whitespace-nowrap text-sm text-center ${getRetentionCellColor(retentionRate)}`}
 												>
-													{rate !== null && rate !== undefined ? `${rate}%` : '-'}
+													{retentionRate !== null && retentionRate !== undefined ? `${retentionRate}%` : '-'}
 												</td>
 											);
 										})}
@@ -405,21 +424,21 @@ function ChurnRetentionPage({ dateRange }) {
 
 				{/* Legend */}
 				<div className="mt-4 flex items-center gap-4 text-xs">
-					<span className="font-medium text-gray-700">Churn Rate:</span>
+					<span className="font-medium text-gray-700">Retention Rate:</span>
 					<span className="flex items-center gap-1">
-						<span className="w-4 h-4 bg-green-200 rounded"></span> Low (&lt;20%)
+						<span className="w-4 h-4 bg-green-200 rounded"></span> Excellent (≥80%)
 					</span>
 					<span className="flex items-center gap-1">
-						<span className="w-4 h-4 bg-green-100 rounded"></span> Good (20-40%)
+						<span className="w-4 h-4 bg-green-100 rounded"></span> Good (60-80%)
 					</span>
 					<span className="flex items-center gap-1">
-						<span className="w-4 h-4 bg-yellow-100 rounded"></span> Medium (40-60%)
+						<span className="w-4 h-4 bg-yellow-100 rounded"></span> Moderate (40-60%)
 					</span>
 					<span className="flex items-center gap-1">
-						<span className="w-4 h-4 bg-orange-100 rounded"></span> High (60-80%)
+						<span className="w-4 h-4 bg-orange-100 rounded"></span> Concerning (20-40%)
 					</span>
 					<span className="flex items-center gap-1">
-						<span className="w-4 h-4 bg-red-100 rounded"></span> Critical (&gt;80%)
+						<span className="w-4 h-4 bg-red-100 rounded"></span> Critical (&lt;20%)
 					</span>
 				</div>
 			</div>
