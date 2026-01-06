@@ -372,9 +372,9 @@ function ChurnRetentionPage({ dateRange }) {
 									<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Signup Year
 									</th>
-									<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+									{/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Customers
-									</th>
+									</th> */}
 									<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Subscriptions
 									</th>
@@ -394,9 +394,9 @@ function ChurnRetentionPage({ dateRange }) {
 										<td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
 											{cohort.signup_year}
 										</td>
-										<td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+										{/* <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
 											{cohort.customers}
-										</td>
+										</td> */}
 										<td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
 											{cohort.subscriptions || cohort.customers}
 										</td>
