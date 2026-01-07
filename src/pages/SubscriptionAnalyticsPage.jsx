@@ -806,47 +806,7 @@ function SubscriptionAnalyticsPage({ dateRange }) {
                 />
             </div>
 
-            {/* Key Insights Panel */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                    <span className="text-2xl mr-2">💡</span>
-                    Key Insights
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <h4 className="font-semibold text-blue-800 mb-2">MRR Health</h4>
-                        <ul className="space-y-1 text-gray-700">
-                            <li>• Net MRR growth driven by {mrrData?.data?.topGrowthDriver || 'new subscriptions'}</li>
-                            <li>• Expansion MRR represents {mrrData?.data?.expansionPercentage || '25'}% of new MRR</li>
-                            <li>• Contraction impact: {mrrData?.data?.contractionImpact || 'low'}</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-purple-800 mb-2">Retention Patterns</h4>
-                        <ul className="space-y-1 text-gray-700">
-                            <li>• Strongest cohort: {cohortData?.data?.strongestCohort || 'Q1 2024'}</li>
-                            <li>• Retention drop-off peaks at month {cohortData?.data?.dropoffMonth || '3'}</li>
-                            <li>• Revenue retention exceeds logo retention by {cohortData?.data?.retentionGap || '15'}%</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-red-800 mb-2">Churn Risks</h4>
-                        <ul className="space-y-1 text-gray-700">
-                            <li>• Primary churn reason: {churnData?.data?.topChurnReason || 'pricing concerns'}</li>
-                            <li>• Involuntary churn: {churnData?.data?.involuntaryPercentage || '30'}% of total</li>
-                            <li>• Win-back rate highest for {churnData?.data?.bestWinbackSegment || 'annual plans'}</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-green-800 mb-2">Recovery Opportunities</h4>
-                        <ul className="space-y-1 text-gray-700">
-                            <li>• First recovery attempt succeeds {dunningData?.data?.firstAttemptRate || '65'}% of time</li>
-                            <li>• ${dunningData?.data?.potentialRecovery || '12,500'} in at-risk payments recoverable</li>
-                            <li>• Payment retry optimization could improve recovery by {dunningData?.data?.optimizationPotential || '15'}%</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+         
         </div>
     );
 }

@@ -3950,7 +3950,7 @@ class VGP_EDD_Stats_Query {
 	 * @param int $max_years Maximum years to track (default: 6).
 	 * @return array Cohort heatmap data.
 	 */
-	public static function get_retention_cohort_heatmap( $max_years = 6 ) {
+	public static function get_retention_cohort_heatmap( $max_years = 10 ) {
 		$wpdb   = self::get_db();
 		$prefix = self::get_table_prefix();
 
@@ -3972,6 +3972,24 @@ class VGP_EDD_Stats_Query {
 		// Count NEW product subscriptions per customer (product-based cohort tracking)
 		// A customer buying Product A in 2022 and Product B in 2023 counts in BOTH years
 		// But renewals of the same product are NOT counted (only first purchase of each product)
+		// Calculate the minimum year to include - start from 2019 if data exists, or use max_years back from current year
+		$min_year_query = $wpdb->get_var(
+			"SELECT MIN(YEAR(created)) FROM {$prefix}edd_subscriptions"
+		);
+		$min_year_from_db = $min_year_query ? intval( $min_year_query ) : null;
+		$calculated_min_year = $current_year - $max_years + 1;
+		
+		// Use the earlier of: database minimum year (if available and >= 2019), or calculated year
+		// But always include from 2019 if we have data from 2019
+		$start_year = 2019;
+		if ( $min_year_from_db && $min_year_from_db >= 2019 ) {
+			$start_year = 2019;
+		} elseif ( $min_year_from_db && $min_year_from_db < $calculated_min_year ) {
+			$start_year = $min_year_from_db;
+		} else {
+			$start_year = $calculated_min_year;
+		}
+		
 		$signup_years = $wpdb->get_results(
 			$wpdb->prepare(
 				"
@@ -4002,8 +4020,8 @@ class VGP_EDD_Stats_Query {
 				GROUP BY YEAR(first_sub.created)
 				ORDER BY signup_year ASC
 				",
-				$current_year - $max_years + 1,
-				$current_year - $max_years + 1
+				$start_year,
+				$start_year
 			),
 			ARRAY_A
 		);
@@ -4155,6 +4173,415 @@ class VGP_EDD_Stats_Query {
 				'customers'           => isset( $result['total_customers'] ) ? intval( $result['total_customers'] ) : 0,
 				'total_subscriptions' => isset( $result['total_subscriptions'] ) ? intval( $result['total_subscriptions'] ) : 0,
 			),
+		);
+	}
+
+	/**
+	 * Get cohort customer details with payment history.
+	 *
+	 * @param int $signup_year The signup year to get customer details for.
+	 * @return array Customer details with payment information.
+	 */
+	public static function get_cohort_customer_details( $signup_year ) {
+		$wpdb   = self::get_db();
+		$prefix = self::get_table_prefix();
+
+		$subscriptions_table = $wpdb->get_var( "SHOW TABLES LIKE '{$prefix}edd_subscriptions'" );
+		$orders_table = $wpdb->get_var( "SHOW TABLES LIKE '{$prefix}edd_orders'" );
+		$customers_table = $wpdb->get_var( "SHOW TABLES LIKE '{$prefix}edd_customers'" );
+		$order_meta_table = $wpdb->get_var( "SHOW TABLES LIKE '{$prefix}edd_ordermeta'" );
+		$order_items_table = $wpdb->get_var( "SHOW TABLES LIKE '{$prefix}edd_order_items'" );
+		
+		// Check if order_items table has subscription_id column
+		$has_subscription_id_column = false;
+		if ( $order_items_table ) {
+			$columns = $wpdb->get_results( "SHOW COLUMNS FROM {$prefix}edd_order_items LIKE 'subscription_id'" );
+			$has_subscription_id_column = ! empty( $columns );
+		}
+
+	if ( ! $subscriptions_table ) {
+		return array(
+			'subscriptions' => array(),
+			'total'     => 0,
+			'message'   => 'EDD Subscriptions table not found. Please ensure Easy Digital Downloads with Recurring Payments is installed and active.',
+		);
+	}
+
+	if ( ! $orders_table || ! $customers_table ) {
+		return array(
+			'subscriptions' => array(),
+			'total'     => 0,
+			'message'   => 'Required EDD tables not found',
+		);
+	}
+
+		$signup_year = intval( $signup_year );
+
+		// Get all subscriptions for customers who first subscribed in this cohort year
+		// This shows the complete subscription history for each customer in the cohort
+		$query = $wpdb->prepare(
+			"
+			SELECT 
+				s.id as subscription_id,
+				s.customer_id,
+				s.product_id,
+				s.status,
+				s.recurring_amount,
+				s.created as subscription_created,
+				c.name,
+				c.email
+			FROM {$prefix}edd_subscriptions s
+			LEFT JOIN {$prefix}edd_customers c ON s.customer_id = c.id
+			WHERE s.customer_id IN (
+				SELECT DISTINCT customer_id
+				FROM {$prefix}edd_subscriptions
+				WHERE YEAR(created) = %d
+			)
+			ORDER BY s.customer_id ASC, s.created ASC
+			",
+			$signup_year
+		);
+
+		$subscriptions = self::get_cached( 'cohort_customer_details_' . $signup_year, $query );
+
+	// Check if we got any results
+	if ( empty( $subscriptions ) || ! is_array( $subscriptions ) ) {
+		return array(
+			'subscriptions' => array(),
+			'total'        => 0,
+			'message'      => sprintf( 'No subscription data found for %d. This could mean no subscriptions were created in this year, or the data hasn\'t been synced yet.', $signup_year ),
+		);
+	}
+
+		$customers = array();
+		foreach ( $subscriptions as $sub ) {
+			$subscription_id = intval( $sub['subscription_id'] );
+
+			// Get last payment - try order_items table first (EDD 3.0+), then fallback to ordermeta
+			$last_payment = null;
+			if ( $order_items_table && $has_subscription_id_column ) {
+				// EDD 3.0+ uses order_items table with subscription_id column
+				$last_payment_query = $wpdb->prepare(
+					"
+					SELECT o.id, o.total, o.date_created, o.status
+					FROM {$prefix}edd_orders o
+					INNER JOIN {$prefix}edd_order_items oi ON o.id = oi.order_id
+					WHERE oi.subscription_id = %d
+					AND o.total > 0
+					AND o.status IN ('complete', 'publish', 'edd_subscription')
+					ORDER BY o.date_created DESC
+					LIMIT 1
+					",
+					$subscription_id
+				);
+				$last_payment_result = $wpdb->get_row( $last_payment_query, ARRAY_A );
+				if ( $last_payment_result ) {
+					$last_payment = $last_payment_result;
+				}
+			}
+			
+			// Fallback to ordermeta if order_items didn't work
+			if ( ! $last_payment && $order_meta_table ) {
+				// Try different meta_key variations
+				$meta_keys_to_try = array( 'subscription_id', '_edd_subscription_payment_id', 'edd_subscription_id' );
+				foreach ( $meta_keys_to_try as $meta_key ) {
+					$last_payment_query = $wpdb->prepare(
+						"
+						SELECT o.id, o.total, o.date_created, o.status
+						FROM {$prefix}edd_orders o
+						INNER JOIN {$prefix}edd_ordermeta om ON o.id = om.edd_order_id
+						WHERE om.meta_key = %s
+						AND om.meta_value = %d
+						AND o.total > 0
+						AND o.status IN ('complete', 'publish', 'edd_subscription')
+						ORDER BY o.date_created DESC
+						LIMIT 1
+						",
+						$meta_key,
+						$subscription_id
+					);
+					$last_payment_result = $wpdb->get_row( $last_payment_query, ARRAY_A );
+					if ( $last_payment_result ) {
+						$last_payment = $last_payment_result;
+						break;
+					}
+				}
+			}
+			
+			// Additional fallback: Check if orders table has subscription_id column directly
+			if ( ! $last_payment && $orders_table ) {
+				$orders_columns = $wpdb->get_results( "SHOW COLUMNS FROM {$prefix}edd_orders LIKE 'subscription_id'" );
+				if ( ! empty( $orders_columns ) ) {
+					$last_payment_query = $wpdb->prepare(
+						"
+						SELECT id, total, date_created, status
+						FROM {$prefix}edd_orders
+						WHERE subscription_id = %d
+						AND total > 0
+						AND status IN ('complete', 'publish', 'edd_subscription')
+						ORDER BY date_created DESC
+						LIMIT 1
+						",
+						$subscription_id
+					);
+					$last_payment_result = $wpdb->get_row( $last_payment_query, ARRAY_A );
+					if ( $last_payment_result ) {
+						$last_payment = $last_payment_result;
+					}
+				}
+			}
+
+			// Get all payments with their years - we'll use the FIRST payment year as year 1
+			$payment_years = array();
+			if ( $order_items_table && $has_subscription_id_column ) {
+				$payment_years_query = $wpdb->prepare(
+					"
+					SELECT YEAR(o.date_created) as payment_year
+					FROM {$prefix}edd_orders o
+					INNER JOIN {$prefix}edd_order_items oi ON o.id = oi.order_id
+					WHERE oi.subscription_id = %d
+					AND o.total > 0
+					AND o.status IN ('complete', 'publish', 'edd_subscription')
+					ORDER BY o.date_created ASC
+					",
+					$subscription_id
+				);
+				$payment_years = $wpdb->get_col( $payment_years_query );
+			} elseif ( $order_meta_table ) {
+				// Try different meta_key variations
+				$meta_keys_to_try = array( 'subscription_id', '_edd_subscription_payment_id', 'edd_subscription_id' );
+				foreach ( $meta_keys_to_try as $meta_key ) {
+					$payment_years_query = $wpdb->prepare(
+						"
+						SELECT YEAR(o.date_created) as payment_year
+						FROM {$prefix}edd_orders o
+						INNER JOIN {$prefix}edd_ordermeta om ON o.id = om.edd_order_id
+						WHERE om.meta_key = %s
+						AND om.meta_value = %d
+						AND o.total > 0
+						AND o.status IN ('complete', 'publish', 'edd_subscription')
+						ORDER BY o.date_created ASC
+						",
+						$meta_key,
+						$subscription_id
+					);
+					$payment_years = $wpdb->get_col( $payment_years_query );
+					if ( ! empty( $payment_years ) ) {
+						break;
+					}
+				}
+			}
+			
+			// Additional fallback: Check if orders table has subscription_id column directly
+			if ( empty( $payment_years ) && $orders_table ) {
+				$orders_columns = $wpdb->get_results( "SHOW COLUMNS FROM {$prefix}edd_orders LIKE 'subscription_id'" );
+				if ( ! empty( $orders_columns ) ) {
+					$payment_years_query = $wpdb->prepare(
+						"
+						SELECT YEAR(date_created) as payment_year
+						FROM {$prefix}edd_orders
+						WHERE subscription_id = %d
+						AND total > 0
+						AND status IN ('complete', 'publish', 'edd_subscription')
+						ORDER BY date_created ASC
+						",
+						$subscription_id
+					);
+					$payment_years = $wpdb->get_col( $payment_years_query );
+				}
+			}
+
+			// Calculate payments per year since FIRST payment
+			// Year 1 = first payment year, Year 2 = second payment year, etc.
+			$payments_per_year = array();
+			if ( ! empty( $payment_years ) ) {
+				// Use the first payment year as the baseline (year 1)
+				$first_payment_year = intval( $payment_years[0] );
+				
+				foreach ( $payment_years as $payment_year ) {
+					// Calculate which year since first payment (1 = first year, 2 = second year, etc.)
+					$year_number = intval( $payment_year ) - $first_payment_year + 1;
+					// Ensure year_number is at least 1
+					if ( $year_number < 1 ) {
+						$year_number = 1;
+					}
+					if ( ! isset( $payments_per_year[ $year_number ] ) ) {
+						$payments_per_year[ $year_number ] = 0;
+					}
+					$payments_per_year[ $year_number ]++;
+				}
+			}
+
+			// Format as "1x", "2x", etc. based on years with payments
+			// Sort by year number to ensure correct order
+			$recurring_payments_display = '';
+			if ( ! empty( $payments_per_year ) ) {
+				ksort( $payments_per_year ); // Sort by year number
+				$year_labels = array();
+				foreach ( $payments_per_year as $year_num => $count ) {
+					$year_labels[] = sprintf( '%dx', $year_num );
+				}
+				$recurring_payments_display = implode( ', ', $year_labels );
+			} else {
+				$recurring_payments_display = '0x';
+			}
+
+			// Keep total count for backward compatibility
+			$payment_count = count( $payment_years );
+
+			// Get payment history (all payments for this subscription)
+			$payment_history = array();
+			if ( $order_items_table && $has_subscription_id_column ) {
+				// EDD 3.0+ uses order_items table
+				$history_query = $wpdb->prepare(
+					"
+					SELECT o.id, o.total, o.date_created
+					FROM {$prefix}edd_orders o
+					INNER JOIN {$prefix}edd_order_items oi ON o.id = oi.order_id
+					WHERE oi.subscription_id = %d
+					AND o.total > 0
+					AND o.status IN ('complete', 'publish', 'edd_subscription')
+					ORDER BY o.date_created DESC
+					LIMIT 5
+					",
+					$subscription_id
+				);
+				$history_results = $wpdb->get_results( $history_query, ARRAY_A );
+				foreach ( $history_results as $payment ) {
+					// Generate admin order URL
+					$order_url = '';
+					if ( function_exists( 'edd_get_admin_url' ) ) {
+						$order_url = edd_get_admin_url(
+							array(
+								'page' => 'edd-payment-history',
+								'view' => 'view-order-details',
+								'id'   => intval( $payment['id'] ),
+							)
+						);
+					} else {
+						// Fallback for older EDD versions
+						$order_url = admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . intval( $payment['id'] ) );
+					}
+					
+					$payment_history[] = array(
+						'id'          => intval( $payment['id'] ),
+						'amount'      => floatval( $payment['total'] ),
+						'date'        => $payment['date_created'],
+						'admin_url'   => $order_url,
+					);
+				}
+			} elseif ( $order_meta_table ) {
+				// Fallback to ordermeta - try different meta_key variations
+				$meta_keys_to_try = array( 'subscription_id', '_edd_subscription_payment_id', 'edd_subscription_id' );
+				foreach ( $meta_keys_to_try as $meta_key ) {
+					$history_query = $wpdb->prepare(
+						"
+						SELECT o.id, o.total, o.date_created
+						FROM {$prefix}edd_orders o
+						INNER JOIN {$prefix}edd_ordermeta om ON o.id = om.edd_order_id
+						WHERE om.meta_key = %s
+						AND om.meta_value = %d
+						AND o.total > 0
+						AND o.status IN ('complete', 'publish', 'edd_subscription')
+						ORDER BY o.date_created DESC
+						LIMIT 5
+						",
+						$meta_key,
+						$subscription_id
+					);
+					$history_results = $wpdb->get_results( $history_query, ARRAY_A );
+					if ( ! empty( $history_results ) ) {
+						break;
+					}
+				}
+				
+				if ( ! empty( $history_results ) ) {
+					foreach ( $history_results as $payment ) {
+						// Generate admin order URL
+						$order_url = '';
+						if ( function_exists( 'edd_get_admin_url' ) ) {
+							$order_url = edd_get_admin_url(
+								array(
+									'page' => 'edd-payment-history',
+									'view' => 'view-order-details',
+									'id'   => intval( $payment['id'] ),
+								)
+							);
+						} else {
+							// Fallback for older EDD versions
+							$order_url = admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . intval( $payment['id'] ) );
+						}
+						
+						$payment_history[] = array(
+							'id'          => intval( $payment['id'] ),
+							'amount'      => floatval( $payment['total'] ),
+							'date'        => $payment['date_created'],
+							'admin_url'   => $order_url,
+						);
+					}
+				}
+			}
+			
+			// Additional fallback: Check if orders table has subscription_id column directly
+			if ( empty( $payment_history ) && $orders_table ) {
+				$orders_columns = $wpdb->get_results( "SHOW COLUMNS FROM {$prefix}edd_orders LIKE 'subscription_id'" );
+				if ( ! empty( $orders_columns ) ) {
+					$history_query = $wpdb->prepare(
+						"
+						SELECT id, total, date_created
+						FROM {$prefix}edd_orders
+						WHERE subscription_id = %d
+						AND total > 0
+						AND status IN ('complete', 'publish', 'edd_subscription')
+						ORDER BY date_created DESC
+						LIMIT 5
+						",
+						$subscription_id
+					);
+					$history_results = $wpdb->get_results( $history_query, ARRAY_A );
+					foreach ( $history_results as $payment ) {
+						// Generate admin order URL
+						$order_url = '';
+						if ( function_exists( 'edd_get_admin_url' ) ) {
+							$order_url = edd_get_admin_url(
+								array(
+									'page' => 'edd-payment-history',
+									'view' => 'view-order-details',
+									'id'   => intval( $payment['id'] ),
+								)
+							);
+						} else {
+							$order_url = admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . intval( $payment['id'] ) );
+						}
+						
+						$payment_history[] = array(
+							'id'          => intval( $payment['id'] ),
+							'amount'      => floatval( $payment['total'] ),
+							'date'        => $payment['date_created'],
+							'admin_url'   => $order_url,
+						);
+					}
+				}
+			}
+
+			$customers[] = array(
+				'subscription_id'    => $subscription_id,
+				'customer_id'       => intval( $sub['customer_id'] ),
+				'name'              => $sub['name'] ? $sub['name'] : 'Unknown',
+				'email'             => $sub['email'] ? $sub['email'] : '',
+				'status'            => $sub['status'],
+				'recurring_amount'  => floatval( $sub['recurring_amount'] ),
+				'last_payment_date' => $last_payment ? $last_payment['date_created'] : null,
+				'last_payment'      => $last_payment ? floatval( $last_payment['total'] ) : null,
+				'recurring_payments' => $payment_count,
+				'recurring_payments_display' => $recurring_payments_display,
+				'payment_history'   => $payment_history,
+			);
+		}
+
+		return array(
+			'subscriptions' => $customers,
+			'total'        => count( $customers ),
 		);
 	}
 

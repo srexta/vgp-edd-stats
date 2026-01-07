@@ -687,7 +687,7 @@ class VGP_EDD_Stats_API {
 				'permission_callback' => array( $this, 'check_permissions' ),
 				'args'                => array(
 					'max_years' => array(
-						'default'           => 6,
+						'default'           => 10,
 						'sanitize_callback' => 'absint',
 					),
 				),
@@ -704,6 +704,25 @@ class VGP_EDD_Stats_API {
 				'permission_callback' => array( $this, 'check_permissions' ),
 				'args'                => array(
 					'year' => array(
+						'required'          => true,
+						'validate_callback' => function( $param ) {
+							return is_numeric( $param ) && intval( $param ) >= 2000 && intval( $param ) <= 2100;
+						},
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/cohort/customer-details',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_cohort_customer_details' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+				'args'                => array(
+					'signup_year' => array(
 						'required'          => true,
 						'validate_callback' => function( $param ) {
 							return is_numeric( $param ) && intval( $param ) >= 2000 && intval( $param ) <= 2100;
@@ -786,10 +805,44 @@ class VGP_EDD_Stats_API {
 	/**
 	 * Check user permissions.
 	 *
-	 * @return bool True if user has permission.
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error True if user has permission, WP_Error otherwise.
 	 */
-	public function check_permissions() {
-		return current_user_can( 'manage_shop_settings' );
+	public function check_permissions( $request = null ) {
+		// Check if user is logged in
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error(
+				'rest_not_logged_in',
+				__( 'You must be logged in to access this endpoint.', 'vgp-edd-stats' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		// Verify nonce if provided (for AJAX requests from frontend)
+		// Note: We allow cookie-based auth for logged-in users, but verify nonce when provided
+		if ( $request ) {
+			$nonce = $request->get_header( 'X-WP-Nonce' );
+			if ( ! empty( $nonce ) && ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+				return new WP_Error(
+					'rest_cookie_invalid_nonce',
+					__( 'Cookie nonce is invalid.', 'vgp-edd-stats' ),
+					array( 'status' => 403 )
+				);
+			}
+		}
+
+		// Check if user has the required capability
+		// Fallback to manage_options if manage_shop_settings doesn't exist (for non-EDD sites)
+		$capability = current_user_can( 'manage_shop_settings' ) ? 'manage_shop_settings' : 'manage_options';
+		if ( ! current_user_can( $capability ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'Sorry, you are not allowed to access this endpoint. You need administrator privileges.', 'vgp-edd-stats' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -1855,6 +1908,24 @@ class VGP_EDD_Stats_API {
 		$data = VGP_EDD_Stats_Query::get_cohort_customer_count( $year );
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Get cohort customer details with payment history.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_cohort_customer_details( $request ) {
+		$signup_year = $request->get_param( 'signup_year' );
+		$data = VGP_EDD_Stats_Query::get_cohort_customer_details( $signup_year );
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'data'    => $data,
+			)
+		);
 	}
 
 	/**

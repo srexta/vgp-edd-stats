@@ -339,4 +339,7 @@ export const API = {
 	// Used for temporary purpose
 	getCohortCustomerCount: (year) =>
 		apiRequest('/cohort/customer-count', { year }),
+
+	getCohortCustomerDetails: (signupYear) =>
+		apiRequest('/cohort/customer-details', { signup_year: signupYear }),
 };
